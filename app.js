@@ -20,8 +20,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 
-// Connect to MongoDB (Hardcoded Connection String for Local Use)
-mongoose.connect("mongodb://127.0.0.1:27017/FootBallDb").then(() => console.log("✅ MongoDB Connected"))
+// Connect to MongoDB (Use Environment Variable in Production, Local String for Development)
+const mongoURI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/FootBallDb";
+mongoose.connect(mongoURI).then(() => console.log("✅ MongoDB Connected"))
     .catch(err => console.error("❌ MongoDB Connection Error:", err));
 
 app.get('/test', (req, res) => {
@@ -196,6 +197,10 @@ app.get('/localTeams', isLoggedIn, async (req, res) => {
 });
 
 // Start server
-app.listen(3000, () => {
-    console.log("🚀 Server is running on port 3000");
-}); 
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(3000, () => {
+        console.log("🚀 Server is running on port 3000");
+    });
+}
+
+module.exports = app; 
